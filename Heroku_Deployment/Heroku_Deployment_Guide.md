@@ -1,20 +1,12 @@
 ## Heroku Deployment
 
-### Instructor Notes
-
-* This Heroku activity is recommended to give students experience in deploying an application that they can then apply to their projects.
-* If you have a preferred deployment method, you are more than welcome to share those with students and to send out third party tutorials on those!
-* Begin assignment by sending out the [Heroku Deployment](Heroku_Deployment) folder to students.
-
 ### Prerequisites
 
 * Sign up for a [Heroku](https://www.heroku.com) account.
 
-* Install the [Heroku CLI tool](https://devcenter.heroku.com/articles/heroku-cli#download-and-install).
-
 ### Deploying an application
 
-* In this activity, we will deploy a Pet Pals application to Heroku. The applications takes the name of a pet and plot it's location on the map. The actual code for the application is not nearly as import as the steps for deploying to Heroku. These steps can repeated for your own applications.
+* In this activity, we will deploy a Pet Pals application to Heroku. The applications takes the name, latitude, and longitude of a pet and plot its location on a map. The actual code for the application is not nearly as import as the steps for deploying to Heroku. These steps can repeated for your own applications.
 
 * This process consists of:
 
@@ -25,7 +17,7 @@
 
 #### Part 1: Create a New Repo
 
-* **Files:** [Pet Pals app](Heroku_Deployment/Starter)
+* **Files:** [Pet Pals app](./Starter)
 
 * From Github create a new repo called **Pet_Pals** and clone it to your desktop.
 
@@ -53,32 +45,21 @@ source activate pet_pals_env
 
 * Next, we install `gunicorn` with `pip install gunicorn`. Explain that gunicorn is a high performance web server that can run their Flask app in a production environment.
 
-* Because this app will use Postgres, we also install `psycopg2` with `pip install psycopg2`.
-
 * Install the remaining libraries into your new environment.
 
 ```sh
 pip install flask
 pip install flask-sqlalchemy
-pip install pandas
-```
-
-* Navigate to the folder that contains `initdb.py` and run the following to initialize the database.
-
-```sh
-python initdb.py
-```
-
-* Create a shell file and add the following code.
-
-```sh
-FLASK_APP=pet_pals/app.py flask run
 ```
 
 * You can test the application by running the following in your command line.
 
+```python
+python app.py
+```
+or
 ```sh
-./run.sh
+flask run
 ```
 
 * Navigate to `127.0.0.1:5000` to view your webpage.
@@ -89,33 +70,29 @@ FLASK_APP=pet_pals/app.py flask run
 pip freeze > requirements.txt
 ```
 
-* The final configuration file that we need is `Procfile`. This file is used by Heroku to run the app.
+* **NOTE:** it is generally a good idea to check your `requirements.txt` file for any unnecessary packages. Only keep the packages that are required to run your application.
 
-```sh
-touch Procfile
-```
+* The final configuration file that we need is `Procfile`. This file is used by Heroku to run the app. Create a new file in VS Code and name it `Procfile` (without any extension).
 
 * Add the following code to the `Procfile` which instructs Heroku how to run the app.
-  
-```sh  
-web: gunicorn pet_pals.app:app
-```
 
-* `pet_pals` is the name of the folder that contains your app as a python package (i.e. the name of the folder with the `__init__.py` file in it).
+```sh
+web: gunicorn app:app
+```
 
 * Add, commit and push everything up to your repo.
 
 #### Part 2: Creating the Heroku App
 
-* Navigate to [Heroku](https://www.heroku.com) and create an account.
+* Navigate to [Heroku](https://www.heroku.com) and create an account if you don't already have one.
 
 * Once you are at the main dash click New in the type right and select **Create a new app**.
 
-  * Give your app an unique name and leave region to default.
+  * Give your app an unique name and leave region to default. A good "hack" is to put your username before the name of your app. That way it is always unique.
 
 * On Heroku, go to the `Deploy` section of your app's homepage, and follow the steps to deploy the app.
 
-  ![Images/deploy05.png](Heroku_Deployment/Images/deploy05.png)
+  ![Images/deploy05.png](Images/deploy05.png)
 
   * In the Deployment method section select GitHub.
 
@@ -123,25 +100,27 @@ web: gunicorn pet_pals.app:app
 
   * With your repo selected, navigate to the **Manual deploy** section below it and click **Deploy Branch**.
 
-  * To confirm your app has been successfully deployed navigate to the top of the page and click **Open app**. This should open a webpage with you pet pals web page. **Note** the database has not been set up yet, so there is one more step before it is fully functioning.
+  * Once it is completed deploying, click the "View" button to open your web app.
 
 #### Part 3: Preparing the Database
 
+* This starter code uses a `.sqlite` file as the database, but you can also use postgres.
+
 * After creating a new app on Heroku, navigate to `Resources`:
 
-  ![Images/deploy01.png](Heroku_Deployment/Images/deploy01.png)
+  ![Images/deploy01.png](Images/deploy01.png)
 
   * Under `Add-ons`, search `Heroku Postgres`. Make sure to use the free version then click Provision.
 
-  ![provision database](Heroku_Deployment/Images/provision_database.png)
+  ![provision database](Images/provision_database.png)
 
-* Once `Herokue Postgres` is listed on click on it.
+* Once `Heroku Postgres` is listed on click on it.
 
 * From the new page, navigate to settings and click on `View Credentials`.
 
 * The connection string to the database should now be available in the **URI** field:
 
-  ![Images/database_connection.png](Heroku_Deployment/Images/database_connection.png)
+  ![Images/database_connection.png](Images/database_connection.png)
 
 * Heroku will automatically assign this URI string to the `DATABASE_URL` environment variable that is used within `app.py`. The code that is already in `app.py` will be able to use that environment variable to connect to the Heroku database.
 
@@ -152,12 +131,12 @@ web: gunicorn pet_pals.app:app
   db = SQLAlchemy(app)
   ```
 
-* The final step requires the Heroku CLI. If you do not currently have it installed please follow the instructions for the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli).
+* Once this is connected, navigate to "more" in the top right and click "run console".
 
-* After adding the database, the final step is to initialize the database. To do this, we use the heroku cli. From the terminal, type the following, be sure to replace `<name of your app>` with the name of your app as it appear in heroku:
+* In the input box enter:
 
 ```sh
-heroku run python initdb.py -a <name of your app>
+python initdb.py
 ```
 
-* Your database is now initialized, and you can open the application using `heroku open` from the terminal or from **Open App** on the webpage.
+* Your database is now initialized and can be connected to your web app and even viewed from PGAdmin.
